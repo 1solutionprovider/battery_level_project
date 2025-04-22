@@ -1,52 +1,64 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(MaterialApp(
-    home: BatteryLevelScreen(),
-    debugShowCheckedModeBanner: false,
-  ));
+  runApp(const MyApp());
 }
 
-class BatteryLevelScreen extends StatefulWidget {
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
-  _BatteryLevelScreenState createState() => _BatteryLevelScreenState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Battery Level Example',
+      home: const MyHomePage(),
+    );
+  }
 }
 
-class _BatteryLevelScreenState extends State<BatteryLevelScreen> {
-  static const MethodChannel _platform =
-      MethodChannel('com.example.batterylevel/battery');
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  static const platform = MethodChannel('com.example.batterylevel'); 
 
   String _batteryLevel = 'Unknown battery level.';
 
   Future<void> _getBatteryLevel() async {
-    String newLevel;
+    String batteryLevel;
     try {
-      final result = await _platform.invokeMethod('getBatteryLevel');
-      final int battery = result as int;
-      newLevel = 'Battery level at $battery%.';
+      final int result = await platform.invokeMethod('getBatteryLevel');
+      batteryLevel = 'Battery level at $result%.';
     } on PlatformException catch (e) {
-      newLevel = "Failed to get battery level: ${e.message}";
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
     }
+
     setState(() {
-      _batteryLevel = newLevel;
+      _batteryLevel = batteryLevel;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Battery Level')),
+      appBar: AppBar(
+        title: const Text('Battery Level Example'),
+      ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text(_batteryLevel),
-            SizedBox(height: 16),
             ElevatedButton(
               onPressed: _getBatteryLevel,
-              child: Text('Get Battery Level'),
+              child: const Text('Get Battery Level'),
             ),
+            Text(_batteryLevel),
           ],
         ),
       ),
